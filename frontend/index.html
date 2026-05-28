@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Search Engine</title>
+    <style>
+        body { font-family: 'Segoe UI', Arial, sans-serif; background-color: #f4f6f9; margin: 0; padding: 40px; text-align: center; }
+        .search-container { max-width: 600px; margin: 50px auto; background: white; padding: 30px; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+        input[type="text"] { width: 80%; padding: 12px; border: 2px solid #ddd; border-radius: 4px; font-size: 16px; outline: none; }
+        input[type="text"]:focus { border-color: #007bff; }
+        button { padding: 12px 20px; background-color: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 16px; margin-left: 10px; }
+        button:hover { background-color: #0056b3; }
+        .results { margin-top: 30px; text-align: left; }
+        .result-item { background: #e9ecef; padding: 15px; border-left: 5px solid #007bff; margin-bottom: 15px; border-radius: 4px; }
+    </style>
+</head>
+<body>
+
+    <div class="search-container">
+        <h2>🤖 AI Contextual Search Engine</h2>
+        <p style="color: #666; font-size: 14px;">Keyword ki jagah context search karein (e.g., "K8s deployment tool")</p>
+        <div style="display: flex; justify-content: center;">
+            <input type="text" id="queryInput" placeholder="Kuch bhi search karein...">
+            <button onclick="performSearch()">Search</button>
+        </div>
+
+        <div class="results" id="resultsContainer"></div>
+    </div>
+
+    <script>
+        async function performSearch() {
+            const query = document.getElementById('queryInput').value;
+            const resultsContainer = document.getElementById('resultsContainer');
+            resultsContainer.innerHTML = "<p>Searching...</p>";
+
+            if(!query) {
+                resultsContainer.innerHTML = "<p style='color:red;'>Please enter a query!</p>";
+                return;
+            }
+
+            try {
+                // Docker Compose / K8s ke hisab se localhost port 8000 par backend chalega
+                const response = await fetch('http://localhost:8000/search', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ query: query })
+                });
+                
+                const data = await response.json();
+                resultsContainer.innerHTML = "";
+
+                if(data.results && data.results.length > 0) {
+                    data.results.forEach(item => {
+                        const div = document.createElement('div');
+                        div.className = 'result-item';
+                        div.innerText = item;
+                        resultsContainer.appendChild(div);
+                    });
+                } else {
+                    resultsContainer.innerHTML = "<p>No matches found.</p>";
+                }
+            } catch (error) {
+                resultsContainer.innerHTML = "<p style='color:red;'>Error connecting to backend.</p>";
+                console.error(error);
+            }
+        }
+    </script>
+</body>
+</html>
