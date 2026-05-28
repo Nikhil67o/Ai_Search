@@ -22,7 +22,7 @@ spec:
         - containerPort: 8000
         env:
         - name: GEMINI_API_KEY
-          value: "AIzaSyCqJ90j8vwbHA_l3M5i4xBmaoLkA_EQxE8"
+          value: "AIzaSyATL_N0mpG5ki_AuqjKMssRtxWbDp0exJs"
         resources:
           requests:
             memory: "512Mi"
@@ -43,4 +43,3 @@ spec:
       port: 8000
       targetPort: 8000
   type: ClusterIP
-EOF

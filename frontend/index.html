@@ -4,67 +4,148 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AI Search Engine</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
-        body { font-family: 'Segoe UI', Arial, sans-serif; background-color: #f4f6f9; margin: 0; padding: 40px; text-align: center; }
-        .search-container { max-width: 600px; margin: 50px auto; background: white; padding: 30px; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
-        input[type="text"] { width: 80%; padding: 12px; border: 2px solid #ddd; border-radius: 4px; font-size: 16px; outline: none; }
-        input[type="text"]:focus { border-color: #007bff; }
-        button { padding: 12px 20px; background-color: #007bff; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 16px; margin-left: 10px; }
-        button:hover { background-color: #0056b3; }
-        .results { margin-top: 30px; text-align: left; }
-        .result-item { background: #e9ecef; padding: 15px; border-left: 5px solid #007bff; margin-bottom: 15px; border-radius: 4px; }
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f4f6f9;
+            margin: 0;
+            padding: 40px 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 80vh;
+        }
+        .search-container {
+            background: #ffffff;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            width: 100%;
+            max-width: 700px;
+        }
+        h2 {
+            text-align: center;
+            color: #111827;
+            margin-bottom: 5px;
+        }
+        p.subtitle {
+            text-align: center;
+            color: #6b7280;
+            font-size: 14px;
+            margin-bottom: 25px;
+        }
+        .input-group {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        input[type="text"] {
+            flex: 1;
+            padding: 14px 16px;
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            font-size: 16px;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+        input[type="text"]:focus {
+            border-color: #2563eb;
+        }
+        button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 14px 28px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        #results {
+            margin-top: 15px;
+        }
+        .result-card {
+            background-color: #f8fafc;
+            border-left: 4px solid #007bff;
+            padding: 20px;
+            border-radius: 0 8px 8px 0;
+            font-size: 15px;
+            color: #334155;
+            line-height: 1.6;
+            white-space: pre-wrap; /* Taaki lists, spaces aur code formatting perfectly print ho */
+        }
+        .error-message {
+            color: #dc2626;
+            font-size: 14px;
+            margin-top: 10px;
+        }
     </style>
 </head>
 <body>
 
-    <div class="search-container">
-        <h2>🤖 AI Contextual Search Engine</h2>
-        <p style="color: #666; font-size: 14px;">Keyword ki jagah context search karein (e.g., "K8s deployment tool")</p>
-        <div style="display: flex; justify-content: center;">
-            <input type="text" id="queryInput" placeholder="Kuch bhi search karein...">
-            <button onclick="performSearch()">Search</button>
-        </div>
-
-        <div class="results" id="resultsContainer"></div>
+<div class="search-container">
+    <h2>🤖 AI Search Engine</h2>
+    
+    <div class="input-group">
+        <input type="text" id="queryInput" placeholder="Ask anything..." onkeypress="handleKeyPress(event)">
+        <button onclick="performSearch()">Search</button>
     </div>
 
-    <script>
-        async function performSearch() {
-            const query = document.getElementById('queryInput').value;
-            const resultsContainer = document.getElementById('resultsContainer');
-            resultsContainer.innerHTML = "<p>Searching...</p>";
+    <div id="results"></div>
+</div>
 
-            if(!query) {
-                resultsContainer.innerHTML = "<p style='color:red;'>Please enter a query!</p>";
-                return;
-            }
-
-            try {
-                // Docker Compose / K8s ke hisab se localhost port 8000 par backend chalega
-                const response = await fetch('http://localhost:8000/search', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ query: query })
-                });
-                
-                const data = await response.json();
-                resultsContainer.innerHTML = "";
-
-                if(data.results && data.results.length > 0) {
-                    data.results.forEach(item => {
-                        const div = document.createElement('div');
-                        div.className = 'result-item';
-                        div.innerText = item;
-                        resultsContainer.appendChild(div);
-                    });
-                } else {
-                    resultsContainer.innerHTML = "<p>No matches found.</p>";
-                }
-            } catch (error) {
-                resultsContainer.innerHTML = "<p style='color:red;'>Error connecting to backend.</p>";
-                console.error(error);
-            }
+<script>
+    function handleKeyPress(event) {
+        if (event.key === "Enter") {
+            performSearch();
         }
-    </script>
+    }
+
+    async function performSearch() {
+        const query = document.getElementById('queryInput').value;
+        const resultsDiv = document.getElementById('results');
+        
+        if (!query.trim()) return;
+        
+        resultsDiv.innerHTML = '<p style="color: #6b7280;">Generating answer from Gemini...</p>';
+
+        try {
+            // Live AWS EC2 Port-Forward Target URL 
+            const response = await fetch('http://18.215.161.19:8000/search', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ query: query })
+            });
+
+            if (!response.ok) {
+                throw new Error('Network response structure issue');
+            }
+
+            const data = await response.json();
+            resultsDiv.innerHTML = '';
+
+            if (data.results && data.results.length > 0 && data.results[0]) {
+                const card = document.createElement('div');
+                card.className = 'result-card';
+                card.innerText = data.results[0];
+                resultsDiv.appendChild(card);
+            } else {
+                resultsDiv.innerHTML = '<p class="error-message">No response generated from AI engine.</p>';
+            }
+
+        } catch (error) {
+            console.error('Error:', error);
+            resultsDiv.innerHTML = '<p class="error-message">Error connecting to backend.</p>';
+        }
+    }
+</script>
+
 </body>
 </html>
