@@ -15,14 +15,32 @@ spec:
         app: ai-backend
     spec:
       containers:
-      - name: backend
-        image: your-dockerhub-username/ai-search-backend:latest # Apni image push karke yahan naam dalein
+      - name: ai-backend
+        image: nikhilshinde143/ai-search-backend:latest
+        imagePullPolicy: Always
         ports:
         - containerPort: 8000
+        env:
+        - name: GEMINI_API_KEY
+          value: "AIzaSyCqJ90j8vwbHA_l3M5i4xBmaoLkA_EQxE8"
         resources:
           requests:
             memory: "512Mi"
-            cpu: "500m"
+            cpu: "250m"
           limits:
             memory: "1Gi"
             cpu: "1000m"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: ai-backend-service
+spec:
+  selector:
+    app: ai-backend
+  ports:
+    - protocol: TCP
+      port: 8000
+      targetPort: 8000
+  type: ClusterIP
+EOF
